@@ -2,10 +2,10 @@ import UserModel from "../models/user-model.js";
 import jwt from "jsonwebtoken";
 export const register = async (req, res) => {
   try {
-    const { userName, email, password, address } = req.body;
+    const { userName, email, password, address, role } = req.body;
 
     if (
-      [userName, email, password, address].some(
+      [userName, email, password, address, role].some(
         (field) => !field || field.trim() === ""
       )
     ) {
@@ -22,7 +22,7 @@ export const register = async (req, res) => {
         .json({ message: "User already exists", success: false });
     }
 
-    const newUser = new UserModel({ userName, password, email, address });
+    const newUser = new UserModel({ userName, password, email, address, role });
 
     await newUser.save();
     // Create and sign a JWT token
@@ -46,7 +46,6 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log(email, password);
 
     if (!email || !password) {
       return res.status(400).json({
@@ -56,7 +55,6 @@ export const login = async (req, res) => {
     }
 
     const user = await UserModel.findOne({ email }).select("+password");
-    console.log("User found:", user);
 
     if (!user) {
       return res.status(400).json({
@@ -66,7 +64,6 @@ export const login = async (req, res) => {
     }
 
     const isPasswordMatch = await user.comparePassword(password);
-    console.log("Password match:", isPasswordMatch);
 
     if (!isPasswordMatch) {
       return res.status(400).json({
@@ -79,7 +76,6 @@ export const login = async (req, res) => {
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, {
       expiresIn: "1h",
     });
-    console.log("JWT token created:", token);
 
     return res.status(201).json({
       success: true,
@@ -104,7 +100,12 @@ export const getUser = async (req, res, next) => {
       message: "user gets successfully",
       data,
     });
-  } catch (error) {}
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal server error",
+      success: false,
+    });
+  }
 };
 
 export const updateUser = async (req, res) => {
@@ -116,5 +117,10 @@ export const updateUser = async (req, res) => {
       success: true,
       message: "Address updated",
     });
-  } catch (error) {}
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal server error",
+      success: false,
+    });
+  }
 };
