@@ -66,8 +66,51 @@ export const bookDelete = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({
-      message: "internal server error",
+      message: "An error occured",
       success: false,
+    });
+  }
+};
+
+export const getAllBook = async (req, res) => {
+  try {
+    const book = await Book.find().sort({ createdAt: -1 });
+    return res.status(201).json({
+      message: "SUCCESS",
+      data: book,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "An error occured",
+    });
+  }
+};
+
+export const getRecentBook = async (req, res) => {
+  try {
+    const book = await Book.find().sort({ createdAt: -1 }).limit(4);
+    return res.status(201).json({
+      message: "SUCCESS",
+      data: book,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "An error occured",
+    });
+  }
+};
+
+export const getBookByID = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const book = await Book.findById(id);
+    return res.status(200).json({
+      message: "update book get successfully",
+      data: book,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "An error occured",
     });
   }
 };
